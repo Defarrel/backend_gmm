@@ -1,0 +1,15 @@
+const express = require('express');
+const router = express.Router();
+const savingsController = require('../controllers/savingsController');
+const { authenticateToken } = require('../middlewares/authMiddleware');
+router.use(authenticateToken);
+
+router.get('/', savingsController.getAllSavings);
+router.get('/:id', savingsController.getSavingDetail);
+router.post('/', savingsController.createSaving);
+router.post('/:id/contribute', savingsController.contributeToSaving);
+
+// Riwayat kontribusi
+router.get('/:id/contributions', savingsController.getSavingContributions);
+
+module.exports = router;
