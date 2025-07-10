@@ -8,6 +8,7 @@ const transactionRoutes = require('./routes/transactions');
 const pensionRoutes = require('./routes/pensiun');
 const savingsRoutes = require('./routes/savings');
 const userRoutes = require('./routes/user');
+const invtRoutes = require('./routes/invt');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -21,6 +22,7 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/pensiun', pensionRoutes);
 app.use('/api/savings', savingsRoutes);
+app.use('/api/invitations', invtRoutes);
 app.use('/api', userRoutes); 
 
 

@@ -8,8 +8,8 @@ router.get('/', savingsController.getAllSavings);
 router.get('/:id', savingsController.getSavingDetail);
 router.post('/', savingsController.createSaving);
 router.post('/:id/contribute', savingsController.contributeToSaving);
-
-// Riwayat kontribusi
+router.post('/:id/withdraw', savingsController.withdrawFromSaving);
 router.get('/:id/contributions', savingsController.getSavingContributions);
+
 
 module.exports = router;
