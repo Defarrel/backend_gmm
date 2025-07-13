@@ -182,3 +182,27 @@ exports.getSavingContributions = async (req, res) => {
   }
 };
 
+// Delete: Hapus tabungan bersama
+exports.deleteSaving = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Periksa apakah tabungan ada
+    const [savingRows] = await db.query(`SELECT * FROM savings WHERE id = ?`, [id]);
+    if (savingRows.length === 0) {
+      return res.status(404).json({ message: 'Tabungan tidak ditemukan' });
+    }
+
+    // Hapus relasi terlebih dahulu untuk menjaga integritas data
+    await db.query('DELETE FROM savings_invitations WHERE saving_id = ?', [id]);
+    await db.query('DELETE FROM savings_participants WHERE saving_id = ?', [id]);
+
+    // Hapus tabungan
+    await db.query('DELETE FROM savings WHERE id = ?', [id]);
+
+    res.json({ message: 'Tabungan berhasil dihapus' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Gagal menghapus tabungan' });
+  }
+};

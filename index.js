@@ -9,6 +9,7 @@ const pensionRoutes = require('./routes/pensiun');
 const savingsRoutes = require('./routes/savings');
 const userRoutes = require('./routes/user');
 const invtRoutes = require('./routes/invt');
+const advisorRoutes = require('./routes/advisorRequest');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -24,8 +25,10 @@ app.use('/api/pensiun', pensionRoutes);
 app.use('/api/savings', savingsRoutes);
 app.use('/api/invitations', invtRoutes);
 app.use('/api', userRoutes); 
+app.use('/api/advisor_requests', advisorRoutes);
+
 
 // Start server
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`✅ Server is running on http://0.0.0.0:${PORT}`);
+  console.log(`Server is running on http://0.0.0.0:${PORT}`);
 });

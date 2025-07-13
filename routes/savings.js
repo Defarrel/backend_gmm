@@ -11,6 +11,7 @@ router.post('/:id/contribute', savingsController.contributeToSaving);
 router.post('/:id/withdraw', savingsController.withdrawFromSaving);
 router.get('/:id/contributions', savingsController.getSavingContributions);
 router.get('/user/:userId', savingsController.getAllSavingsByUser);
+router.delete('/delete/:id', savingsController.deleteSaving);
 
 
 module.exports = router;
