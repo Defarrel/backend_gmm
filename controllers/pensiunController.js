@@ -25,14 +25,6 @@ exports.addPensionGoal = async (req, res) => {
     [req.user.id, target_amount, 'Dana pensiun untuk masa pensiun', deadline]
     );
 
-
-    // Tambahkan transaksi pemasukan
-    await db.query(
-      `INSERT INTO transactions (user_id, type, category, amount, description, date)
-       VALUES (?, 'pemasukan', 'Dana Pensiun', ?, 'Setoran Dana Pensiun', NOW())`,
-      [req.user.id, target_amount]
-    );
-
     res.status(201).json({ message: 'Dana pensiun berhasil ditambahkan' });
   } catch (err) {
     res.status(500).json({ error: err.message });

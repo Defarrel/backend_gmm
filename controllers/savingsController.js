@@ -14,11 +14,31 @@ exports.getAllSavings = async (req, res) => {
   }
 };
 
-// Detail: Ambil detail tabungan tertentu + owner + anggota
+exports.getAllSavingsByUser = async (req, res) => {
+  const userId = req.params.userId;
+
+  try {
+    const [rows] = await db.query(`
+      SELECT DISTINCT s.*, u.name AS owner_name
+      FROM savings s
+      JOIN users u ON s.user_id = u.id
+      LEFT JOIN savings_invitations si ON s.id = si.saving_id
+      WHERE s.user_id = ? OR (si.receiver_id = ? AND si.status = 'accepted')
+    `, [userId, userId]);
+
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Gagal mengambil data savings' });
+  }
+};
+
+
+// Detail: Ambil detail tabungan tertentu + owner + anggota (dijumlah per user)
 exports.getSavingDetail = async (req, res) => {
   const { id } = req.params;
   try {
-    // Ambil data utama saving
+    // Ambil data utama saving + owner
     const [savingResult] = await db.query(`
       SELECT s.*, u.name AS owner_name
       FROM savings s
@@ -32,12 +52,13 @@ exports.getSavingDetail = async (req, res) => {
 
     const saving = savingResult[0];
 
-    // Ambil anggota tabungan
+    // Ambil anggota tabungan, total amount dijumlahkan per user
     const [members] = await db.query(`
-      SELECT u.id, u.name, sp.amount
+      SELECT u.id, u.name, SUM(sp.amount) AS amount
       FROM savings_participants sp
       JOIN users u ON sp.user_id = u.id
       WHERE sp.saving_id = ?
+      GROUP BY u.id, u.name
     `, [id]);
 
     // Gabungkan response
@@ -49,7 +70,6 @@ exports.getSavingDetail = async (req, res) => {
     res.status(500).json({ message: 'Gagal mengambil detail tabungan' });
   }
 };
-
 
 
 
@@ -70,12 +90,14 @@ exports.createSaving = async (req, res) => {
 // Update: Top-up ke tabungan bersama
 exports.contributeToSaving = async (req, res) => {
   const { id } = req.params;
-  const { user_id, amount } = req.body;
+  const { amount } = req.body;
+  const userId = req.user.id; // ✅ Ambil dari token yang login
+
   try {
     await db.query(`
       INSERT INTO savings_participants (saving_id, user_id, amount)
       VALUES (?, ?, ?)
-    `, [id, user_id, amount]);
+    `, [id, userId, amount]);
 
     await db.query(`
       UPDATE savings
@@ -87,13 +109,14 @@ exports.contributeToSaving = async (req, res) => {
     await db.query(`
       INSERT INTO transactions (user_id, type, category, amount, description, date)
       VALUES (?, 'pemasukan', 'Top Up Tabungan Bersama', ?, 'Top Up Tabungan Bersama', NOW())
-    `, [user_id, amount]);
+    `, [userId, amount]);
 
     res.json({ message: 'Berhasil menabung ke tabungan bersama' });
   } catch (err) {
     res.status(500).json({ message: 'Gagal menyimpan kontribusi' });
   }
 };
+
 
 // Withdraw: Tarik dari tabungan bersama
 exports.withdrawFromSaving = async (req, res) => {
